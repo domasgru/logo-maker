@@ -76,23 +76,30 @@ onMounted(() => {
 <template>
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    :width="logoLayout.width"
-    :height="logoLayout.height"
-    :viewBox="`0 0 ${logoLayout.width} ${logoLayout.height}`"
+    :width="logoLayout?.width || null"
+    :height="logoLayout?.height || null"
+    :viewBox="
+      logoLayout ? `0 0 ${logoLayout.width} ${logoLayout.height}` : null
+    "
   >
     <template v-for="element in data" :key="element.id">
       <svg
         v-if="element.type === 'svg'"
-        ref="image"
-        :viewBox="getSVGProps(graphic.content).viewBox"
+        :id="element.id"
+        :viewBox="getSVGProps(element.content).viewBox"
         width="120"
-        height="120"
-        v-html="getSVGProps(graphic.content).innerHTML"
+        height="122"
+        :x="logoLayout?.imageX || 0"
+        :y="logoLayout?.imageY || 0"
+        v-html="getSVGProps(element.content).innerHTML"
       ></svg>
-      <svg v-if="element.type === 'text'">
+      <svg
+        v-if="element.type === 'text'"
+        :id="element.id"
+        :x="logoLayout?.textX || 0"
+        :y="logoLayout?.textY || 0"
+      >
         <text
-          ref="logoText"
-          v-for="text in texts"
           :key="text.id"
           v-html="text.content"
           :font-size="text.fontSize"
