@@ -22,7 +22,7 @@ const data = [
     type: 'text',
     fontSize: 46,
     fontFamily: 'Mansalva',
-    content: 'Wizard',
+    content: 'asdasdasd',
   },
 ];
 
@@ -75,6 +75,7 @@ onMounted(() => {
 
 <template>
   <svg
+    class="main-svg"
     xmlns="http://www.w3.org/2000/svg"
     :width="logoLayout?.width || null"
     :height="logoLayout?.height || null"
@@ -112,12 +113,7 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.root-svg {
-  border: 3px solid grey;
-}
-
-.main {
+.main-svg {
   outline: 3px solid green;
-  width: 200px;
 }
 </style>
