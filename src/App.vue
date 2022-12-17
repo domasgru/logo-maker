@@ -52,7 +52,7 @@ const computeLogoLayout1 = async () => {
   const logoWidth = Math.max(imageBounding.width, textBounding.width);
   const logoHeight = imageBounding.height + textBounding.height;
 
-  const textX = logoWidth / 2;
+  const textX = 0;
   const textY = imageBounding.height;
 
   const imageY = 0;
@@ -100,10 +100,10 @@ onMounted(() => {
         :y="logoLayout?.textY || 0"
       >
         <text
-          :key="text.id"
-          v-html="text.content"
-          :font-size="text.fontSize"
-          :font-family="text.fontFamily"
+          :key="element.id"
+          v-html="element.content"
+          :font-size="element.fontSize"
+          :font-family="element.fontFamily"
           dominant-baseline="text-before-edge"
         ></text>
       </svg>
