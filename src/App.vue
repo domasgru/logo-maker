@@ -1,15 +1,14 @@
-a
 <script setup>
 import {
   SVG,
   extend as SVGextend,
   Element as SVGElement,
 } from '@svgdotjs/svg.js';
-import { onMounted, computed, ref } from 'vue';
+import { onMounted, computed, ref, nextTick } from 'vue';
 import svg from './assets/vue.svg';
 import Session from 'svg-text-to-path';
 
-const data = [
+const data = ref([
   {
     id: 'mark',
     type: 'svg',
@@ -21,27 +20,49 @@ const data = [
     id: 'name',
     type: 'text',
     fontSize: 46,
-    fontFamily: 'Mansalva',
-    content: 'asdasdasd',
+    fontFamily: 'Roboto',
+    content: 'Wizard',
   },
-];
+]);
 
-// const a = document.querySelector('.aaa');
-// console.log(a);
-// let session = new Session(a, {
-//   googleApiKey: 'AIzaSyA7_DioSood5zPy7mlIVvxvDnLPWCETL24',
-// });
-// let stat = await session.replaceAll();
-// let out = session.getSvgString();
-// console.log(stat, out);
-
-const parser = new DOMParser();
 const getSVGProps = (svg) => {
+  const parser = new DOMParser();
   const { documentElement } = parser.parseFromString(svg, 'image/svg+xml');
   return {
     viewBox: `0 0 ${documentElement.viewBox.baseVal.width} ${documentElement.viewBox.baseVal.height}`,
     innerHTML: documentElement.innerHTML,
   };
+};
+
+const logoName = computed(() => data.value.find(({ id }) => id === 'name'));
+
+const updateLogoName = async (event) => {
+  const elementIndex = data.value.findIndex(({ id }) => id === 'name');
+  data.value[elementIndex].content = event.target.value;
+  await nextTick();
+  computeLogoLayout1();
+};
+
+const isConvertingTextToSVG = ref(false);
+const convertTextToSVG = async () => {
+  isConvertingTextToSVG.value = true;
+  await nextTick();
+
+  const text = document.querySelector('#textConverter');
+  const session = new Session(text, {
+    googleApiKey: 'AIzaSyA7_DioSood5zPy7mlIVvxvDnLPWCETL24',
+  });
+
+  await session.replaceAll();
+  const svgText = session.getSvgString();
+  const { innerHTML } = getSVGProps(svgText);
+  const elementIndex = data.value.findIndex(({ id }) => id === 'name');
+  data.value[elementIndex].svgContent = innerHTML;
+
+  isConvertingTextToSVG.value = false;
+  await nextTick();
+  computeLogoLayout1();
+  console.log(data.value);
 };
 
 const logoLayout = ref(null);
@@ -74,45 +95,73 @@ onMounted(() => {
 </script>
 
 <template>
-  <svg
-    class="main-svg"
-    xmlns="http://www.w3.org/2000/svg"
-    :width="logoLayout?.width || null"
-    :height="logoLayout?.height || null"
-    :viewBox="
-      logoLayout ? `0 0 ${logoLayout.width} ${logoLayout.height}` : null
-    "
-  >
-    <template v-for="element in data" :key="element.id">
-      <svg
-        v-if="element.type === 'svg'"
-        :id="element.id"
-        :viewBox="getSVGProps(element.content).viewBox"
-        width="120"
-        height="122"
-        :x="logoLayout?.imageX || 0"
-        :y="logoLayout?.imageY || 0"
-        v-html="getSVGProps(element.content).innerHTML"
-      ></svg>
-      <svg
-        v-if="element.type === 'text'"
-        :id="element.id"
-        :x="logoLayout?.textX || 0"
-        :y="logoLayout?.textY || 0"
-      >
+  <div class="container">
+    <!-- Font rendering start -->
+    <button @click="convertTextToSVG()">Convert text to SVG</button>
+    <template v-if="isConvertingTextToSVG">
+      <svg id="textConverter">
         <text
-          :key="element.id"
-          v-html="element.content"
-          :font-size="element.fontSize"
-          :font-family="element.fontFamily"
+          v-html="logoName.content"
+          :font-size="logoName.fontSize"
+          :font-family="logoName.fontFamily"
           dominant-baseline="text-before-edge"
         ></text>
       </svg>
     </template>
-  </svg>
+    <!-- Font rendering end -->
+
+    <input :value="logoName.content" @input="updateLogoName" />
+    <svg
+      class="main-svg"
+      xmlns="http://www.w3.org/2000/svg"
+      :width="logoLayout?.width || null"
+      :height="logoLayout?.height || null"
+      :viewBox="
+        logoLayout ? `0 0 ${logoLayout.width} ${logoLayout.height}` : null
+      "
+    >
+      <template v-for="element in data" :key="element.id">
+        <svg
+          v-if="element.type === 'svg'"
+          :id="element.id"
+          :viewBox="getSVGProps(element.content).viewBox"
+          width="120"
+          height="122"
+          :x="logoLayout?.imageX || 0"
+          :y="logoLayout?.imageY || 0"
+          v-html="getSVGProps(element.content).innerHTML"
+        ></svg>
+        <svg
+          v-if="element.type === 'text' && !element.svgContent"
+          :id="element.id"
+          :x="logoLayout?.textX || 0"
+          :y="logoLayout?.textY || 0"
+        >
+          <text
+            :key="element.id"
+            v-html="element.content"
+            :font-size="element.fontSize"
+            :font-family="element.fontFamily"
+            dominant-baseline="text-before-edge"
+          ></text>
+        </svg>
+        <svg
+          v-if="element.type === 'text' && element.svgContent"
+          :id="element.id"
+          :x="logoLayout?.textX || 0"
+          :y="logoLayout?.textY || 0"
+          v-html="element.svgContent"
+        ></svg>
+      </template>
+    </svg>
+  </div>
 </template>
 
 <style scoped>
+.container {
+  display: flex;
+  flex-direction: column;
+}
 .main-svg {
   outline: 3px solid green;
 }
