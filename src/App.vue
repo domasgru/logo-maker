@@ -43,12 +43,22 @@ const updateLogoName = async (event) => {
   computeLogoLayout1();
 };
 
-const isConvertingTextToSVG = ref(false);
+const isConvertingTextToSVG = ref(true);
+const convertTextWidth = ref(null);
+const convertTextHeight = ref(null);
 const convertTextToSVG = async () => {
   isConvertingTextToSVG.value = true;
   await nextTick();
 
   const text = document.querySelector('#textConverter');
+
+  const textEl = document.querySelector('#textEl');
+  const textBounding = textEl.getBoundingClientRect();
+  convertTextWidth.value = textBounding.width;
+  convertTextHeight.value = textBounding.height;
+
+  await nextTick();
+
   const session = new Session(text, {
     googleApiKey: 'AIzaSyA7_DioSood5zPy7mlIVvxvDnLPWCETL24',
   });
@@ -59,7 +69,7 @@ const convertTextToSVG = async () => {
   const elementIndex = data.value.findIndex(({ id }) => id === 'name');
   data.value[elementIndex].svgContent = innerHTML;
 
-  isConvertingTextToSVG.value = false;
+  isConvertingTextToSVG.value = true;
   await nextTick();
   computeLogoLayout1();
   console.log(data.value);
@@ -99,8 +109,15 @@ onMounted(() => {
     <!-- Font rendering start -->
     <button @click="convertTextToSVG()">Convert text to SVG</button>
     <template v-if="isConvertingTextToSVG">
-      <svg id="textConverter">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        :width="convertTextWidth"
+        :height="convertTextHeight"
+        :viewBox="`0 0 ${convertTextWidth} ${convertTextHeight}`"
+        id="textConverter"
+      >
         <text
+          id="textEl"
           v-html="logoName.content"
           :font-size="logoName.fontSize"
           :font-family="logoName.fontFamily"
