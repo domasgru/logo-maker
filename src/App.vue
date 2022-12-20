@@ -136,8 +136,14 @@ const saveAsPNG = () => {
 };
 
 onMounted(async () => {
-  await convertTextToSVG();
-  computeLogoLayout1();
+  document.fonts.onloading = async () => {
+    console.log('loading');
+    await document.fonts.ready;
+    console.log('ready');
+
+    await convertTextToSVG();
+    computeLogoLayout1();
+  };
 });
 </script>
 
@@ -219,15 +225,7 @@ onMounted(async () => {
       :viewBox="`0 0 ${convertTextWidth} ${convertTextHeight}`"
       id="textConverter"
     >
-      <rect
-        x="0"
-        y="0"
-        width="100%"
-        height="100%"
-        fill="none"
-        stroke="#000"
-        stroke-width="2"
-      ></rect>
+      <rect x="0" y="0" width="100%" height="100%" fill="none"></rect>
       <text
         id="textEl"
         v-html="logoName.content"
