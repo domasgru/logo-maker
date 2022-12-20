@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, nextTick } from 'vue';
+import { ref, onMounted, watch, nextTick } from 'vue';
 import { getSVGProps } from '../utils';
 
 const props = defineProps({
@@ -27,14 +27,6 @@ const computeAutoLayout = async () => {
   const { width: textWidth, height: textHeight } = logoElementsRefs.value
     .find(({ id }) => id === 'name')
     .getBoundingClientRect();
-
-  console.log(
-    imageWidth,
-    imageHeight,
-    textWidth,
-    textHeight,
-    logoElementsRefs.value.find(({ id }) => id === 'name')
-  );
 
   if (props.autoLayout === 'markTopTextBottom') {
     const logoWidth = Math.max(imageWidth, textWidth);
@@ -68,16 +60,16 @@ const computeAutoLayout = async () => {
   }
 };
 
-onMounted(() => {
-  computeAutoLayout();
-  if (props.autoLayout) {
-    document.fonts.onloading = async () => {
-      await document.fonts.ready;
-      computeAutoLayout(props.autolayout);
-    };
-  }
-  console.log('refs', logoElementsRefs.value[0].id);
-});
+watch(
+  () => props.data,
+  () => {
+    if (!props.autoLayout) {
+      return;
+    }
+    computeAutoLayout();
+  },
+  { immediate: true, deep: true }
+);
 </script>
 
 <template>
@@ -99,7 +91,7 @@ onMounted(() => {
       :id="element.id"
       :viewBox="getSVGProps(element.svgData)?.viewBox"
       :width="element.width"
-      :height="element.height"
+      :height="element.width * getSVGProps(element.svgData)?.aspectRatio"
       :x="autoLayoutData?.[element.id].x || 0"
       :y="autoLayoutData?.[element.id].y || 0"
       v-html="getSVGProps(element.svgData)?.innerHTML"

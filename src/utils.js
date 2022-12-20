@@ -5,6 +5,9 @@ export const getSVGProps = (svg) => {
     return {
       viewBox: `0 0 ${documentElement.viewBox.baseVal.width} ${documentElement.viewBox.baseVal.height}`,
       innerHTML: documentElement.innerHTML,
+      aspectRatio:
+        documentElement.viewBox.baseVal.height /
+        documentElement.viewBox.baseVal.width,
     };
   } catch (e) {
     console.error(e);
