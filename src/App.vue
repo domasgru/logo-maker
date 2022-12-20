@@ -137,6 +137,7 @@ onMounted(() => {
     <!-- Font rendering end -->
 
     <input :value="logoName.content" @input="updateLogoName" />
+
     <svg
       class="main-svg"
       xmlns="http://www.w3.org/2000/svg"
@@ -181,9 +182,6 @@ onMounted(() => {
           :y="logoLayout?.textY || 0"
           v-html="element.svgContent"
         ></svg>
-        <svg width="100" height="20" x="10" y="40">
-          <text>hellsdasdasdo</text>
-        </svg>
       </template>
     </svg>
   </div>
