@@ -9,6 +9,7 @@ import svg from './assets/vue.svg';
 import Session from 'svg-text-to-path';
 import { saveSvgAsPng } from 'save-svg-as-png';
 import { mockLogoData } from './data';
+import RenderingEngine from './components/RenderingEngine.vue';
 
 //--STATE:
 //----dynamic logo data
@@ -70,11 +71,16 @@ const convertTextToSVG = async () => {
 
   await session.replaceAll();
   const svgText = session.getSvgString();
+  console.log(svgText);
   const { innerHTML } = getSVGProps(svgText);
   const elementIndex = data.value.findIndex(({ id }) => id === 'name');
   data.value[elementIndex].svgContent = innerHTML;
   data.value[elementIndex].svgWidth = textBounding.width;
   data.value[elementIndex].svgHeight = textBounding.height;
+  //new
+  data.value[elementIndex].svgData = svgText;
+  data.value[elementIndex].width = textBounding.width;
+  data.value[elementIndex].height = textBounding.height;
 
   isConvertingTextToSVG.value = false;
   await nextTick();
@@ -158,7 +164,7 @@ onMounted(async () => {
       @input="updateSymbolWidth"
     />
     <button @click="saveAsPNG">download</button>
-
+    <RenderingEngine :data="data" auto-layout="markTopTextBottom" />
     <svg
       class="main-svg"
       xmlns="http://www.w3.org/2000/svg"
@@ -172,12 +178,12 @@ onMounted(async () => {
         <svg
           v-if="element.type === 'svg'"
           :id="element.id"
-          :viewBox="getSVGProps(element.content).viewBox"
+          :viewBox="getSVGProps(element.svgData).viewBox"
           :width="element.width"
-          :height="element.width * getSVGProps(element.content).aspectRatio"
+          :height="element.width * getSVGProps(element.svgData).aspectRatio"
           :x="logoLayout?.imageX || 0"
           :y="logoLayout?.imageY || 0"
-          v-html="getSVGProps(element.content).innerHTML"
+          v-html="getSVGProps(element.svgData).innerHTML"
         ></svg>
         <svg
           v-if="element.type === 'text' && !element.svgContent"
