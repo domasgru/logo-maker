@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@svgdotjs/svg.js": "^3.1.2",
+    "save-svg-as-png": "^1.4.17",
     "svg-text-to-path": "^2.0.2",
     "vue": "^3.2.45"
   },

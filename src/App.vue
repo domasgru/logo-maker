@@ -43,6 +43,7 @@ const updateLogoName = async (event) => {
   computeLogoLayout1();
 };
 
+// Converting:
 const isConvertingTextToSVG = ref(true);
 const convertTextWidth = ref(null);
 const convertTextHeight = ref(null);
@@ -75,8 +76,12 @@ const convertTextToSVG = async () => {
   console.log(data.value);
 };
 
+// Layouting:
 const logoLayout = ref(null);
 const computeLogoLayout1 = async () => {
+  logoLayout.value = null;
+  await nextTick();
+
   const imageBounding = document.getElementById('mark').getBoundingClientRect();
   const textBounding = document.getElementById('name').getBoundingClientRect();
 
@@ -194,5 +199,7 @@ onMounted(() => {
 }
 .main-svg {
   outline: 3px solid green;
+  width: 400px;
+  height: auto;
 }
 </style>
