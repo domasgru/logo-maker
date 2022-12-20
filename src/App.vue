@@ -57,20 +57,19 @@ const updateSymbolWidth = async (event) => {
 };
 
 // Converting:
-const isConvertingTextToSVG = ref(false);
+const isConvertingTextToSVG = ref(true);
 const convertTextWidth = ref(null);
 const convertTextHeight = ref(null);
 const convertTextToSVG = async () => {
-  isConvertingTextToSVG.value = true;
-  await nextTick();
-
   const text = document.querySelector('#textConverter');
 
   const textEl = document.querySelector('#textEl');
+  textEl.removeAttribute('id');
+
   const textBounding = textEl.getBoundingClientRect();
   convertTextWidth.value = textBounding.width;
   convertTextHeight.value = textBounding.height;
-
+  console.log(textEl, textBounding);
   await nextTick();
 
   const session = new Session(text, {
@@ -82,11 +81,26 @@ const convertTextToSVG = async () => {
   const { innerHTML } = getSVGProps(svgText);
   const elementIndex = data.value.findIndex(({ id }) => id === 'name');
   data.value[elementIndex].svgContent = innerHTML;
+  data.value[elementIndex].svgWidth = textBounding.width;
+  data.value[elementIndex].svgHeight = textBounding.height;
 
   isConvertingTextToSVG.value = false;
   await nextTick();
   computeLogoLayout1();
-  console.log(data.value);
+
+  await nextTick();
+  // reset
+  isConvertingTextToSVG.value = true;
+  convertTextWidth.value = null;
+  convertTextHeight.value = null;
+};
+
+const updateNameFont = async (event) => {
+  const elementIndex = data.value.findIndex(({ id }) => id === 'name');
+  data.value[elementIndex].fontFamily = event.target.value;
+  await nextTick();
+  await convertTextToSVG();
+  computeLogoLayout1();
 };
 
 // Layouting:
@@ -129,38 +143,12 @@ onMounted(async () => {
 
 <template>
   <div class="container">
-    <!-- Font rendering start -->
-    <button v-show="false" @click="convertTextToSVG()">
-      Convert text to SVG
-    </button>
-    <template v-if="isConvertingTextToSVG">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        :width="convertTextWidth"
-        :height="convertTextHeight"
-        :viewBox="`0 0 ${convertTextWidth} ${convertTextHeight}`"
-        id="textConverter"
-      >
-        <rect
-          x="0"
-          y="0"
-          width="100%"
-          height="100%"
-          fill="none"
-          stroke="#000"
-          stroke-width="2"
-        ></rect>
-        <text
-          id="textEl"
-          v-html="logoName.content"
-          :font-size="logoName.fontSize"
-          :font-family="logoName.fontFamily"
-          dominant-baseline="text-before-edge"
-        ></text>
-      </svg>
-    </template>
-    <!-- Font rendering end -->
-
+    <select name="cars" id="cars" @input="updateNameFont" :value="'Roboto'">
+      <option value="Mansalva">Mansalva</option>
+      <option value="Rubik Gemstones">Rubik Gemstones</option>
+      <option value="Roboto">Roboto</option>
+      <option value="Sacramento">Sacramento</option>
+    </select>
     <input :value="logoName.content" @input="updateLogoName" />
     <input
       type="range"
@@ -210,9 +198,9 @@ onMounted(async () => {
         <svg
           v-if="element.type === 'text' && element.svgContent"
           :id="element.id"
-          :width="convertTextWidth"
-          :height="convertTextHeight"
-          :viewBox="`0 0 ${convertTextWidth} ${convertTextHeight}`"
+          :width="element.svgWidth"
+          :height="element.svgHeight"
+          :viewBox="`0 0 ${element.svgWidth} ${element.svgHeight}`"
           :x="logoLayout?.textX || 0"
           :y="logoLayout?.textY || 0"
           v-html="element.svgContent"
@@ -220,6 +208,36 @@ onMounted(async () => {
       </template>
     </svg>
   </div>
+
+  <!-- Font rendering start -->
+  <button v-show="true" @click="convertTextToSVG()">Convert text to SVG</button>
+  <template v-if="isConvertingTextToSVG">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      :width="convertTextWidth"
+      :height="convertTextHeight"
+      :viewBox="`0 0 ${convertTextWidth} ${convertTextHeight}`"
+      id="textConverter"
+    >
+      <rect
+        x="0"
+        y="0"
+        width="100%"
+        height="100%"
+        fill="none"
+        stroke="#000"
+        stroke-width="2"
+      ></rect>
+      <text
+        id="textEl"
+        v-html="logoName.content"
+        :font-size="logoName.fontSize"
+        :font-family="logoName.fontFamily"
+        dominant-baseline="text-before-edge"
+      ></text>
+    </svg>
+  </template>
+  <!-- Font rendering end -->
 </template>
 
 <style scoped>
@@ -234,7 +252,7 @@ onMounted(async () => {
 }
 
 #textConverter {
-  position: absolute;
-  visibility: hidden;
+  /* position: absolute;
+  visibility: hidden; */
 }
 </style>
