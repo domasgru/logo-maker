@@ -42,7 +42,6 @@ const updateLogoName = async (event) => {
 };
 
 const updateSymbolWidth = async (event) => {
-  console.log(event.target.value);
   const elementIndex = data.value.findIndex(({ id }) => id === 'mark');
   data.value[elementIndex].width = event.target.value;
   await nextTick();
@@ -62,7 +61,6 @@ const convertTextToSVG = async () => {
   const textBounding = textEl.getBoundingClientRect();
   convertTextWidth.value = textBounding.width;
   convertTextHeight.value = textBounding.height;
-  console.log(textEl, textBounding);
   await nextTick();
 
   const session = new Session(text, {
@@ -71,7 +69,6 @@ const convertTextToSVG = async () => {
 
   await session.replaceAll();
   const svgText = session.getSvgString();
-  console.log(svgText);
   const { innerHTML } = getSVGProps(svgText);
   const elementIndex = data.value.findIndex(({ id }) => id === 'name');
   data.value[elementIndex].svgContent = innerHTML;
@@ -135,9 +132,7 @@ const saveAsPNG = () => {
 
 onMounted(async () => {
   document.fonts.onloading = async () => {
-    console.log('loading');
     await document.fonts.ready;
-    console.log('ready');
 
     await convertTextToSVG();
     computeLogoLayout1();

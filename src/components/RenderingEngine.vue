@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 import { getSVGProps } from '../utils';
 
 const props = defineProps({
@@ -16,19 +16,27 @@ const props = defineProps({
 // AUTO LAYOUTING:
 // autolayout compose logo by predefined logo layouts
 const autoLayoutData = ref(null);
-const computeAutoLayout = async (layout) => {
+const logoElementsRefs = ref();
+const computeAutoLayout = async () => {
   autoLayoutData.value = null;
   await nextTick();
 
-  const { width: imageWidth, height: imageHeight } = document
-    .getElementById('mark')
+  const { width: imageWidth, height: imageHeight } = logoElementsRefs.value
+    .find(({ id }) => id === 'mark')
     .getBoundingClientRect();
-  const { width: textWidth, height: textHeight } = document
-    .getElementById('name')
+  const { width: textWidth, height: textHeight } = logoElementsRefs.value
+    .find(({ id }) => id === 'name')
     .getBoundingClientRect();
-  console.log('ww', layout);
-  if (layout === 'markTopTextBottom') {
-    console.log('xxx');
+
+  console.log(
+    imageWidth,
+    imageHeight,
+    textWidth,
+    textHeight,
+    logoElementsRefs.value.find(({ id }) => id === 'name')
+  );
+
+  if (props.autoLayout === 'markTopTextBottom') {
     const logoWidth = Math.max(imageWidth, textWidth);
     const logoHeight = imageHeight + textHeight;
 
@@ -41,33 +49,34 @@ const computeAutoLayout = async (layout) => {
     autoLayoutData.value = {
       width: logoWidth,
       height: logoHeight,
-      image: {
+      mark: {
         x: imageX,
         y: imageY,
       },
-      text: {
+      name: {
         x: textX,
         y: textY,
       },
     };
     console.log('xxx', autoLayoutData.value);
   }
-  if (layout === 'markBottomTextTop') {
+  if (props.autoLayout === 'markBottomTextTop') {
   }
-  if (layout === 'markleftTextRight') {
+  if (props.autoLayout === 'markleftTextRight') {
   }
-  if (layout === 'markRightTextLeft') {
+  if (props.autoLayout === 'markRightTextLeft') {
   }
 };
 
 onMounted(() => {
-  console.log(props.autoLayout);
+  computeAutoLayout();
   if (props.autoLayout) {
     document.fonts.onloading = async () => {
       await document.fonts.ready;
       computeAutoLayout(props.autolayout);
     };
   }
+  console.log('refs', logoElementsRefs.value[0].id);
 });
 </script>
 
@@ -85,6 +94,7 @@ onMounted(() => {
   >
     <svg
       v-for="element in data"
+      ref="logoElementsRefs"
       :key="element.id"
       :id="element.id"
       :viewBox="getSVGProps(element.svgData)?.viewBox"
