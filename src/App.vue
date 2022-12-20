@@ -116,6 +116,15 @@ onMounted(() => {
         :viewBox="`0 0 ${convertTextWidth} ${convertTextHeight}`"
         id="textConverter"
       >
+        <rect
+          x="0"
+          y="0"
+          width="100%"
+          height="100%"
+          fill="none"
+          stroke="#000"
+          stroke-width="2"
+        ></rect>
         <text
           id="textEl"
           v-html="logoName.content"
@@ -165,10 +174,16 @@ onMounted(() => {
         <svg
           v-if="element.type === 'text' && element.svgContent"
           :id="element.id"
+          :width="convertTextWidth"
+          :height="convertTextHeight"
+          :viewBox="`0 0 ${convertTextWidth} ${convertTextHeight}`"
           :x="logoLayout?.textX || 0"
           :y="logoLayout?.textY || 0"
           v-html="element.svgContent"
         ></svg>
+        <svg width="100" height="20" x="10" y="40">
+          <text>hellsdasdasdo</text>
+        </svg>
       </template>
     </svg>
   </div>
