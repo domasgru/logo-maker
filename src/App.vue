@@ -7,6 +7,7 @@ import {
 import { onMounted, computed, ref, nextTick } from 'vue';
 import svg from './assets/vue.svg';
 import Session from 'svg-text-to-path';
+import { saveSvgAsPng } from 'save-svg-as-png';
 
 const data = ref([
   {
@@ -31,6 +32,9 @@ const getSVGProps = (svg) => {
   return {
     viewBox: `0 0 ${documentElement.viewBox.baseVal.width} ${documentElement.viewBox.baseVal.height}`,
     innerHTML: documentElement.innerHTML,
+    aspectRatio:
+      documentElement.viewBox.baseVal.height /
+      documentElement.viewBox.baseVal.width,
   };
 };
 
@@ -40,11 +44,20 @@ const updateLogoName = async (event) => {
   const elementIndex = data.value.findIndex(({ id }) => id === 'name');
   data.value[elementIndex].content = event.target.value;
   await nextTick();
+  await convertTextToSVG();
+  computeLogoLayout1();
+};
+
+const updateSymbolWidth = async (event) => {
+  console.log(event.target.value);
+  const elementIndex = data.value.findIndex(({ id }) => id === 'mark');
+  data.value[elementIndex].width = event.target.value;
+  await nextTick();
   computeLogoLayout1();
 };
 
 // Converting:
-const isConvertingTextToSVG = ref(true);
+const isConvertingTextToSVG = ref(false);
 const convertTextWidth = ref(null);
 const convertTextHeight = ref(null);
 const convertTextToSVG = async () => {
@@ -70,7 +83,7 @@ const convertTextToSVG = async () => {
   const elementIndex = data.value.findIndex(({ id }) => id === 'name');
   data.value[elementIndex].svgContent = innerHTML;
 
-  isConvertingTextToSVG.value = true;
+  isConvertingTextToSVG.value = false;
   await nextTick();
   computeLogoLayout1();
   console.log(data.value);
@@ -104,7 +117,12 @@ const computeLogoLayout1 = async () => {
   };
 };
 
-onMounted(() => {
+const saveAsPNG = () => {
+  saveSvgAsPng(document.querySelector('.main-svg'), 'logo.png');
+};
+
+onMounted(async () => {
+  await convertTextToSVG();
   computeLogoLayout1();
 });
 </script>
@@ -112,7 +130,9 @@ onMounted(() => {
 <template>
   <div class="container">
     <!-- Font rendering start -->
-    <button @click="convertTextToSVG()">Convert text to SVG</button>
+    <button v-show="false" @click="convertTextToSVG()">
+      Convert text to SVG
+    </button>
     <template v-if="isConvertingTextToSVG">
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -142,6 +162,16 @@ onMounted(() => {
     <!-- Font rendering end -->
 
     <input :value="logoName.content" @input="updateLogoName" />
+    <input
+      type="range"
+      id="volume"
+      name="volume"
+      min="60"
+      max="200"
+      :value="120"
+      @input="updateSymbolWidth"
+    />
+    <button @click="saveAsPNG">download</button>
 
     <svg
       class="main-svg"
@@ -157,8 +187,8 @@ onMounted(() => {
           v-if="element.type === 'svg'"
           :id="element.id"
           :viewBox="getSVGProps(element.content).viewBox"
-          width="120"
-          height="122"
+          :width="element.width"
+          :height="element.width * getSVGProps(element.content).aspectRatio"
           :x="logoLayout?.imageX || 0"
           :y="logoLayout?.imageY || 0"
           v-html="getSVGProps(element.content).innerHTML"
@@ -199,7 +229,12 @@ onMounted(() => {
 }
 .main-svg {
   outline: 3px solid green;
-  width: 400px;
-  height: auto;
+  /* width: 400px;
+  height: auto; */
+}
+
+#textConverter {
+  position: absolute;
+  visibility: hidden;
 }
 </style>
