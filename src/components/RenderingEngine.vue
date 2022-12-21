@@ -21,22 +21,22 @@ const computeAutoLayout = async () => {
   autoLayoutData.value = null;
   await nextTick();
 
-  const { width: imageWidth, height: imageHeight } = logoElementsRefs.value
+  const { width: markWidth, height: markHeight } = logoElementsRefs.value
     .find(({ id }) => id === 'mark')
     .getBoundingClientRect();
-  const { width: textWidth, height: textHeight } = logoElementsRefs.value
+  const { width: nameWidth, height: nameHeight } = logoElementsRefs.value
     .find(({ id }) => id === 'name')
     .getBoundingClientRect();
 
   if (props.autoLayout === 'markTopTextBottom') {
-    const logoWidth = Math.max(imageWidth, textWidth);
-    const logoHeight = imageHeight + textHeight;
+    const logoWidth = Math.max(markWidth, nameWidth);
+    const logoHeight = markHeight + nameHeight;
 
-    const textX = textWidth >= imageWidth ? 0 : (logoWidth - textWidth) / 2;
-    const textY = imageHeight;
+    const textX = nameWidth >= markWidth ? 0 : (logoWidth - nameWidth) / 2;
+    const textY = markHeight;
 
     const imageY = 0;
-    const imageX = imageWidth >= textWidth ? 0 : (logoWidth - imageWidth) / 2;
+    const imageX = markWidth >= nameWidth ? 0 : (logoWidth - markWidth) / 2;
 
     autoLayoutData.value = {
       width: logoWidth,
@@ -98,5 +98,3 @@ watch(
     ></svg>
   </svg>
 </template>
-
-<style scoped lang="scss"></style>

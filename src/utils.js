@@ -10,6 +10,6 @@ export const getSVGProps = (svg) => {
         documentElement.viewBox.baseVal.width,
     };
   } catch (e) {
-    console.error(e);
+    //console.error(e);
   }
 };
