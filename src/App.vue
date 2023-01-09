@@ -78,6 +78,109 @@ onMounted(() => {
     convertTextToSVG();
   };
 });
+
+// Create button animation
+const logoListRef = ref();
+const magicWandRef = ref();
+const createButtonRef = ref();
+const createButtonLoaderRef = ref();
+const createButtonTextRef = ref();
+const sparkleLeftRef = ref();
+const sparkleTopRef = ref();
+const sparkleRightRef = ref();
+const isCreateButtonBeingAnimated = ref(false);
+const createButtonAnimationTimeline = gsap.timeline({
+  paused: true,
+  onComplete() {
+    //isCreateButtonBeingAnimated.value = false;
+    //createButtonAnimationTimeline.revert();
+  },
+});
+const animateCreateButton = () => {
+  isCreateButtonBeingAnimated.value = true;
+  const { x: listX, y: listY } = logoListRef.value.getBoundingClientRect();
+  const { x: sparkleX, y: sparkleY } =
+    sparkleLeftRef.value.getBoundingClientRect();
+  const moveToX = listX - sparkleX;
+  const moveToY = listY - sparkleY + 276;
+
+  createButtonAnimationTimeline
+    .to(magicWandRef.value, {
+      rotate: 15,
+      y: 5,
+      ease: 'power3.in',
+      duration: 0.1,
+    })
+    .to(
+      [sparkleLeftRef.value, sparkleTopRef.value, sparkleRightRef.value],
+      {
+        scale: 12,
+        duration: 0.2,
+      },
+      '>'
+    )
+    .to(
+      [sparkleLeftRef.value, sparkleTopRef.value, sparkleRightRef.value],
+      {
+        fill: '#5025D1',
+        ease: 'power3.out',
+        motionPath: [
+          { x: moveToX / 2, y: 20 },
+          { x: moveToX, y: moveToY },
+        ],
+        stagger: 0.2,
+        rotate: 50,
+        autoAlpha: 0,
+        duration: 1,
+      },
+      '<'
+    )
+    .to(
+      magicWandRef.value,
+      {
+        rotate: -40,
+        y: -15,
+        x: -15,
+        ease: 'power3.in',
+        duration: 0.1,
+      },
+      '<'
+    )
+    .to(
+      magicWandRef.value,
+      {
+        rotate: 0,
+        y: 0,
+        x: 0,
+        ease: 'power3.out',
+        duration: 0.2,
+      },
+      '>'
+    );
+  // .to(
+  //   createButtonRef.value.$el,
+  //   {
+  //     filter: 'blur(20px)',
+  //     ease: 'power3.in',
+  //     scale: 0.7,
+  //     y: -10,
+  //     x: -200,
+  //     rotate: 15,
+  //     autoAlpha: 0,
+  //     duration: 0.2,
+  //   },
+  //   '>'
+  // );
+  // .to(
+  //   createButtonLoaderRef.value.$el,
+  //   {
+  //     autoAlpha: 1,
+  //   },
+  //   '<'
+  // );
+
+  createButtonAnimationTimeline.play();
+};
 </script>
 
 <template>
